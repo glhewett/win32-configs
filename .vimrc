@@ -1,4 +1,3 @@
-set guifont=Inconsolata_for_Powerline:h16
 " Leader
 let mapleader = " "
 
@@ -12,9 +11,21 @@ set showcmd       " display incomplete commands
 set incsearch     " do incremental searching
 set laststatus=2  " Always display the status line
 set autowrite     " Automatically :write before running commands
+set tabstop=2
+set shiftwidth=2
+set shiftround
+set expandtab
 
 set encoding=utf-8
 scriptencoding utf-8
+
+if (has("gui_running"))
+  set guifont=Inconsolata_for_Powerline:h16
+  set guioptions -=m "remove menubar
+  set guioptions -=T "removes toolbar
+  set guioptions -=r "removes right scrollbar
+  set visualbell
+endif
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -22,15 +33,88 @@ if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
   syntax on
 endif
 
-if filereadable(expand("~/.vimrc.bundles"))
-  source ~/.vimrc.bundles
+if &compatible
+  set nocompatible
+end
+
+" Remove declared plugins
+function! s:UnPlug(plug_name)
+  if has_key(g:plugs, a:plug_name)
+    call remove(g:plugs, a:plug_name)
+  endif
+endfunction
+command!  -nargs=1 UnPlug call s:UnPlug(<args>)
+
+let g:has_async = v:version >= 800 || has('nvim')
+
+call plug#begin('~/.vim/bundle')
+
+" Define bundles via Github repos
+Plug 'tpope/vim-fugitive' " git integration 
+Plug 'chriskempson/vim-tomorrow-theme'  " default theme I use
+Plug 'airblade/vim-gitgutter' " shows git changes in the gutter
+Plug 'tpope/vim-vinegar' " enhancements to netrw integrations
+Plug 'ctrlpvim/ctrlp.vim' " fuzzy file search
+Plug 'editorconfig/editorconfig-vim' " obeys editorconfig
+Plug 'maksimr/vim-jsbeautify' " tools for beautifying js and json
+Plug 'rking/ag.vim' " uses the silver searcher for project wide searching
+Plug 'vim-scripts/tComment' " toggle comments
+Plug 'tpope/vim-dispatch' " async tasks
+Plug 'tpope/vim-dotenv'  " .env support
+Plug 'tpope/vim-vividchalk' " neat colors
+Plug 'vim-airline/vim-airline' " the bottom ui
+Plug 'vim-airline/vim-airline-themes' " bottom ui themes
+Plug 'tpope/vim-unimpaired' " shortcuts [q ]q
+Plug 'christoomey/vim-run-interactive'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'godlygeek/tabular'
+Plug 'groenewege/vim-less'
+Plug 'janko-m/vim-test'
+Plug 'mattn/gist-vim'
+Plug 'mattn/webapi-vim'
+Plug 'mtscout6/syntastic-local-eslint.vim'
+Plug 'mustache/vim-mustache-handlebars'
+Plug 'mxw/vim-jsx'
+Plug 'pangloss/vim-javascript'
+Plug 'pbrisbin/vim-mkdir'
+Plug 'slim-template/vim-slim'
+Plug 'tpope/vim-bundler'
+Plug 'tpope/vim-classpath'
+Plug 'tpope/vim-endwise'
+Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-liquid'
+Plug 'tpope/vim-projectionist'
+Plug 'tpope/vim-rails'
+Plug 'tpope/vim-rake'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-rhubarb'
+Plug 'tpope/vim-speeddating'
+Plug 'tpope/vim-surround'
+Plug 'xenoterracide/html.vim'
+Plug 'kana/vim-operator-user'
+Plug 'rhysd/vim-clang-format'
+Plug 'andypayne/vim-checkbox'
+Plug 'octol/vim-cpp-enhanced-highlight'
+Plug 'JuliaEditorSupport/julia-vim'
+Plug 'vhdirk/vim-cmake'
+Plug 'MarcWeber/vim-addon-mw-utils'
+Plug 'tomtom/tlib_vim'
+Plug 'garbas/vim-snipmate'
+
+if g:has_async
+  Plug 'w0rp/ale' " asychronous syntax checker
+  Plug 'skywind3000/asyncrun.vim'
 endif
+
+call plug#end()
 
 " Load matchit.vim, but only if the user hasn't installed a newer version.
 if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
   runtime! macros/matchit.vim
 endif
 
+set list listchars=tab:»·,trail:·,nbsp:·
+set nojoinspaces
 filetype plugin indent on
 
 augroup vimrcEx
@@ -66,17 +150,6 @@ augroup END
 " shell for syntax highlighting purposes.
 let g:is_posix = 1
 
-" Softtabs, 2 spaces
-set tabstop=2
-set shiftwidth=2
-set shiftround
-set expandtab
-
-" Display extra whitespace
-set list listchars=tab:»·,trail:·,nbsp:·
-
-" Use one space, not two, after punctuation.
-set nojoinspaces
 
 " Use The Silver Searcher https://github.com/ggreer/the_silver_searcher
 if executable('ag')
@@ -181,7 +254,7 @@ let g:gist_detect_filetype = 1
 let g:gist_open_browser_after_post = 1
 let g:gist_show_privates = 1
 let g:gist_get_multiplefile = 1
-let g:gist_api_url = 'https://sqbu-github.cisco.com/api/v3'
+let g:gist_api_url = 'https://github.com/api/v3'
 
 " Ctrl-P
 let g:ctrlp_user_command = 'ag %s -i --nocolor --nogroup --hidden --ignore .git --ignore .svn --ignore .hg --ignore .DS_Store --ignore "**/*.pyc" -g ""'
@@ -190,9 +263,4 @@ let g:ctrlp_user_command = 'ag %s -i --nocolor --nogroup --hidden --ignore .git 
 let g:airline_powerline_fonts = 1
 
 " Color Scheme
-colorscheme Tomorrow-Night
-
-" Local config
-if filereadable($HOME . "/.vimrc.local")
-  source ~/.vimrc.local
-endif
+colorscheme Tomorrow-Night-Eighties
